@@ -9,8 +9,9 @@
 #include <cuda.h>
 
 #define WIDTH 244
-#define MASK_WIDTH 31
 #define TILE_WIDTH 32
+#define MASK_WIDTH 31
+#define H_MASK_WIDTH 31 / 2
 
 __constant__ float M[MASK_WIDTH][MASK_WIDTH];
 
@@ -26,8 +27,52 @@ __constant__ float M[MASK_WIDTH][MASK_WIDTH];
 		exit(1);														\
 	} }
 
-__global__ void convKernel(float *A, float *B, float *C) {
-	// Write your kernel ...
+__global__ void convKernel(float *A, float *B) {
+	unsigned int ty = threadIdx.y;
+	unsigned int tx = threadIdx.x;
+	unsigned int row = blockIdx.y * blockDim.y + ty;
+	unsigned int col = blockIdx.x * blockDim.x + tx;
+
+	__shared__ float s_A[TILE_WIDTH + MASK_WIDTH / 2][TILE_WIDTH + MASK_WIDTH / 2];
+
+	if (row < WIDTH && col < WIDTH) {
+		// Top left
+		if (row - H_MASK_WIDTH < 0 && col - H_MASK_WIDTH < 0) {
+
+		}
+		// Top
+		else if (row - H_MASK_WIDTH < 0) {
+
+		}
+		// Top right
+		else if (row - H_MASK_WIDTH < 0 && col + H_MASK_WIDTH >= WIDTH) {
+
+		}
+		// Right
+		else if (col + H_MASK_WIDTH >= WIDTH) {
+
+		}
+		// Bottom right
+		else if (row + H_MASK_WIDTH >= WIDTH && col + H_MASK_WIDTH >= WIDTH) {
+
+		}
+		// Bottom
+		else if (row + H_MASK_WIDTH >= WIDTH) {
+
+		}
+		// Bottom left
+		else if (row + H_MASK_WIDTH >= WIDTH && col - H_MASK_WIDTH < 0) {
+
+		}
+		// Left
+		else if (col - H_MASK_WIDTH < 0) {
+
+		}
+		// Center
+		else {
+			s_A[ty + H_MASK_WIDTH][tx + H_MASK_WIDTH] = A[row * WIDTH + col];
+		}
+	}
 }
 
 int main()
@@ -61,6 +106,8 @@ int main()
 	convKernel<<<dimBlock, dimGrid>>>(A_d, B_d);
 
 	CHECK_CUDA_RESULT(cudaMemcpy(B_h, B_d, WIDTH * WIDTH * sizeof(float), cudaMemcpyDeviceToHost));
+
+	// Verify the results here ...
 
 	cudaFree(A_d);
 	cudaFree(B_d);
