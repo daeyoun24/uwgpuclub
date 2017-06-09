@@ -1,3 +1,9 @@
+/**
+ * Daeyoun Kim
+ * GitHub: https://github.com/daeyoun24/uwgpuclub
+ */
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <cuda.h>
@@ -5,6 +11,8 @@
 #define WIDTH 244
 #define MASK_WIDTH 31
 #define TILE_WIDTH 32
+
+__constant__ float M[MASK_WIDTH][MASK_WIDTH];
 
 /**
  * This macro checks return value of the CUDA runtime call and exits
@@ -35,6 +43,8 @@ int main()
 	for (unsigned int i = 0; i < MASK_WIDTH * MASK_WIDTH; ++i) {
 		M_h[i] = (float)rand() / RAND_MAX * 5.0f;
 	}
+
+	CHECK_CUDA_RESULT(cudaMemcpyToSymbol(M, M_h, (MASK_WIDTH * MASK_WIDTH) * sizeof(float)));
 
 	for (unsigned int i = 0; i < WIDTH * WIDTH; ++i) {
 		A_h[i] = (float)rand() % 256;
