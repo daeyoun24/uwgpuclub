@@ -38,40 +38,42 @@ __global__ void convKernel(float *A, float *B) {
 	if (row < WIDTH && col < WIDTH) {
 		// Top left
 		if (row - H_MASK_WIDTH < 0 && col - H_MASK_WIDTH < 0) {
-
+			s_A[ty][tx] = 0;
 		}
 		// Top
 		else if (row - H_MASK_WIDTH < 0) {
-
+			s_A[ty][tx + H_MASK_WIDTH] = 0;
 		}
 		// Top right
 		else if (row - H_MASK_WIDTH < 0 && col + H_MASK_WIDTH >= WIDTH) {
-
+			s_A[ty][tx + H_MASK_WIDTH * 2] = 0;
 		}
 		// Right
 		else if (col + H_MASK_WIDTH >= WIDTH) {
-
+			s_A[ty + H_MASK_WIDTH][tx + H_MASK_WIDTH * 2] = 0;
 		}
 		// Bottom right
 		else if (row + H_MASK_WIDTH >= WIDTH && col + H_MASK_WIDTH >= WIDTH) {
-
+			s_A[ty + H_MASK_WIDTH * 2][tx + H_MASK_WIDTH * 2] = 0;
 		}
 		// Bottom
 		else if (row + H_MASK_WIDTH >= WIDTH) {
-
+			s_A[ty + H_MASK_WIDTH * 2][tx + H_MASK_WIDTH] = 0;
 		}
 		// Bottom left
 		else if (row + H_MASK_WIDTH >= WIDTH && col - H_MASK_WIDTH < 0) {
-
+			s_A[ty + H_MASK_WIDTH * 2][tx] = 0;
 		}
 		// Left
 		else if (col - H_MASK_WIDTH < 0) {
-
+			s_A[ty + H_MASK_WIDTH][tx] = 0;
 		}
 		// Center
 		else {
 			s_A[ty + H_MASK_WIDTH][tx + H_MASK_WIDTH] = A[row * WIDTH + col];
 		}
+
+		__syncthreads();
 	}
 }
 
