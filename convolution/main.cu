@@ -74,6 +74,16 @@ __global__ void convKernel(float *A, float *B) {
 		}
 
 		__syncthreads();
+
+		float b_value = 0;
+
+		for (unsigned int i = 0; i < MASK_WIDTH; ++i) {
+			for (unsigned int j = 0; j < MASK_WIDTH; ++j) {
+				b_value += s_A[ty + i][tx + j] * M[i][j];
+			}
+		}
+
+		B[row * WIDTH + col] = b_value;
 	}
 }
 
